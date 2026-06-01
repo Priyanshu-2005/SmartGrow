@@ -83,9 +83,8 @@ export default function ImageVerifyPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className={`glass-card p-10 mb-10 text-center cursor-pointer transition-all duration-300 ${
-            dragActive ? "border-white/20 shadow-lg shadow-white/5" : ""
-          }`}
+          className={`glass-card p-10 mb-10 text-center cursor-pointer transition-all duration-300 ${dragActive ? "border-white/20 shadow-lg shadow-white/5" : ""
+            }`}
           onDragEnter={handleDrag}
           onDragOver={handleDrag}
           onDragLeave={handleDrag}
@@ -152,25 +151,24 @@ export default function ImageVerifyPage() {
                       <AlertTriangle className="w-8 h-8 text-warning" />
                     </div>
                   )}
-                  <h2 className={`text-2xl font-bold ${
-                    result.verdict === "Authentic" ? "text-success" : 
-                    result.verdict === "AI-Generated / Deepfake" ? "text-danger" : "text-warning"
-                  }`}>
+                  <h2 className={`text-2xl font-bold ${result.verdict === "Authentic" ? "text-success" :
+                      result.verdict === "AI-Generated / Deepfake" ? "text-danger" : "text-warning"
+                    }`}>
                     {result.verdict}
                   </h2>
                 </div>
-                
+
                 <div className="flex justify-center mb-10">
                   <TrustScoreGauge score={result.trust_score} />
                 </div>
-                
+
                 <h3 className="text-lg font-semibold text-text-primary mb-6 text-left border-b border-border-color pb-2">
                   Forensic Signals
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                   {result.signals.map((signal: any, idx: number) => (
-                    <SignalCard key={idx} signal={signal} />
+                    <SignalCard key={idx} index={idx} signal={signal} />
                   ))}
                 </div>
               </div>
