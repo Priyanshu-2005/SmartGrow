@@ -30,13 +30,13 @@ export default function HomePage() {
         {/* Floating orbs */}
         <motion.div
           className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%)" }}
           animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
           className="absolute bottom-1/3 right-1/4 w-96 h-96 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(107, 33, 168, 0.12) 0%, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%)" }}
           animate={{ x: [0, -20, 0], y: [0, 30, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -48,10 +48,10 @@ export default function HomePage() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
-            style={{ background: "rgba(124, 58, 237, 0.1)", border: "1px solid rgba(124, 58, 237, 0.2)" }}
+            style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}
           >
-            <Sparkles className="w-4 h-4 text-brand-mid" />
-            <span className="text-sm text-brand-light font-medium">AI-Powered Content Verification Platform</span>
+            <Sparkles className="w-4 h-4 text-text-primary" />
+            <span className="text-sm text-text-primary font-medium">AI-Powered Content Verification Platform</span>
           </motion.div>
 
           {/* Main heading */}
@@ -60,12 +60,12 @@ export default function HomePage() {
             className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight tracking-tight mb-6"
           >
             <span className="text-text-primary">Verify </span>
-            <span className="bg-gradient-to-r from-brand-light via-brand-mid to-brand-glow bg-clip-text text-transparent">
+            <span className="text-text-secondary">
               Authenticity
             </span>
             <br />
             <span className="text-text-primary">in the Age of </span>
-            <span className="bg-gradient-to-r from-brand-glow to-brand-light bg-clip-text text-transparent">AI</span>
+            <span className="text-text-primary">AI</span>
           </motion.h1>
 
           {/* Subtitle */}
@@ -110,7 +110,7 @@ export default function HomePage() {
               { value: "5+", label: "Signal Types" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <p className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-brand-light to-brand-mid bg-clip-text text-transparent">
+                <p className="text-2xl md:text-3xl font-bold text-text-primary">
                   {stat.value}
                 </p>
                 <p className="text-xs text-text-muted mt-1 uppercase tracking-wider">{stat.label}</p>
@@ -133,7 +133,7 @@ export default function HomePage() {
             variants={stagger}
             className="text-center mb-16"
           >
-            <motion.p variants={fadeInUp} className="text-brand-light text-sm font-semibold uppercase tracking-widest mb-3">
+            <motion.p variants={fadeInUp} className="text-text-secondary text-sm font-semibold uppercase tracking-widest mb-3">
               The Problem
             </motion.p>
             <motion.h2 variants={fadeInUp} className="text-3xl md:text-5xl font-bold text-text-primary mb-6">
@@ -165,7 +165,7 @@ export default function HomePage() {
                 stat: "72%",
                 title: "Can't Distinguish",
                 desc: "of people can't tell AI content from human content",
-                color: "#8B5CF6",
+                color: "#A3A3A3",
               },
             ].map((item, i) => (
               <motion.div
@@ -202,7 +202,7 @@ export default function HomePage() {
             variants={stagger}
             className="text-center mb-16"
           >
-            <motion.p variants={fadeInUp} className="text-brand-light text-sm font-semibold uppercase tracking-widest mb-3">
+            <motion.p variants={fadeInUp} className="text-text-secondary text-sm font-semibold uppercase tracking-widest mb-3">
               How It Works
             </motion.p>
             <motion.h2 variants={fadeInUp} className="text-3xl md:text-5xl font-bold text-text-primary mb-6">
@@ -240,12 +240,12 @@ export default function HomePage() {
                 className="relative"
               >
                 <div className="glass-card glass-card-hover p-8 h-full">
-                  <span className="text-6xl font-bold text-brand-deep/30 absolute top-4 right-6">
+                  <span className="text-6xl font-bold text-white/10 absolute top-4 right-6">
                     {item.step}
                   </span>
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-6"
-                    style={{ background: "rgba(124, 58, 237, 0.1)", border: "1px solid rgba(124, 58, 237, 0.2)" }}>
-                    <item.icon className="w-6 h-6 text-brand-mid" />
+                    style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
+                    <item.icon className="w-6 h-6 text-text-primary" />
                   </div>
                   <h3 className="text-xl font-semibold text-text-primary mb-3">{item.title}</h3>
                   <p className="text-sm text-text-muted leading-relaxed">{item.desc}</p>
@@ -266,7 +266,7 @@ export default function HomePage() {
             variants={stagger}
             className="text-center mb-16"
           >
-            <motion.p variants={fadeInUp} className="text-brand-light text-sm font-semibold uppercase tracking-widest mb-3">
+            <motion.p variants={fadeInUp} className="text-text-secondary text-sm font-semibold uppercase tracking-widest mb-3">
               Capabilities
             </motion.p>
             <motion.h2 variants={fadeInUp} className="text-3xl md:text-5xl font-bold text-text-primary mb-6">
@@ -325,15 +325,15 @@ export default function HomePage() {
                 className="glass-card glass-card-hover p-7 group"
               >
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 transition-colors"
-                  style={{ background: "rgba(124, 58, 237, 0.1)", border: "1px solid rgba(124, 58, 237, 0.2)" }}>
-                  <item.icon className="w-6 h-6 text-brand-mid group-hover:text-brand-light transition-colors" />
+                  style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
+                  <item.icon className="w-6 h-6 text-text-primary group-hover:text-text-secondary transition-colors" />
                 </div>
                 <h3 className="text-lg font-semibold text-text-primary mb-2">{item.title}</h3>
                 <p className="text-sm text-text-muted mb-4 leading-relaxed">{item.desc}</p>
                 <ul className="space-y-2">
                   {item.features.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-xs text-text-secondary">
-                      <CheckCircle className="w-3.5 h-3.5 text-brand-mid shrink-0" />
+                      <CheckCircle className="w-3.5 h-3.5 text-text-primary shrink-0" />
                       {f}
                     </li>
                   ))}
@@ -355,7 +355,7 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
           >
             <div className="glass-card p-12 md:p-16">
-              <Shield className="w-14 h-14 text-brand-mid mx-auto mb-6" />
+              <Shield className="w-14 h-14 text-text-primary mx-auto mb-6" />
               <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4">
                 Ready to Verify?
               </h2>

@@ -117,7 +117,7 @@ export default function DocumentsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className={`glass-card p-8 mb-8 text-center cursor-pointer transition-all duration-300 ${
-            dragActive ? "border-brand-mid shadow-lg shadow-brand-mid/10" : ""
+            dragActive ? "border-white/20 shadow-lg shadow-white/5" : ""
           }`}
           onDragEnter={handleDrag}
           onDragOver={handleDrag}
@@ -136,7 +136,7 @@ export default function DocumentsPage() {
         >
           {uploading ? (
             <div className="py-8">
-              <Loader2 className="w-10 h-10 text-brand-mid mx-auto mb-4 animate-spin" />
+              <Loader2 className="w-10 h-10 text-text-primary mx-auto mb-4 animate-spin" />
               <p className="text-text-primary font-medium">Analyzing document...</p>
               <p className="text-text-muted text-sm mt-1">Running tamper detection and integrity checks</p>
             </div>
@@ -144,10 +144,10 @@ export default function DocumentsPage() {
             <div className="py-8">
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
                 style={{
-                  background: dragActive ? "rgba(124, 58, 237, 0.15)" : "rgba(124, 58, 237, 0.08)",
-                  border: `2px dashed ${dragActive ? "var(--brand-mid)" : "rgba(124, 58, 237, 0.2)"}`,
+                  background: dragActive ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)",
+                  border: `2px dashed ${dragActive ? "rgba(255, 255, 255, 0.2)" : "rgba(255, 255, 255, 0.1)"}`,
                 }}>
-                <Upload className={`w-7 h-7 ${dragActive ? "text-brand-mid" : "text-brand-light/50"}`} />
+                <Upload className={`w-7 h-7 ${dragActive ? "text-text-primary" : "text-text-secondary"}`} />
               </div>
               <p className="text-text-primary font-medium mb-1">
                 {dragActive ? "Drop your file here" : "Drag & drop or click to upload"}
@@ -166,7 +166,7 @@ export default function DocumentsPage() {
           transition={{ delay: 0.2 }}
         >
           <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <span className="w-1.5 h-5 rounded-full bg-brand-mid" />
+            <span className="w-1.5 h-5 rounded-full bg-text-primary" />
             Your Documents
           </h2>
 
@@ -178,7 +178,7 @@ export default function DocumentsPage() {
             </div>
           ) : documents.length === 0 ? (
             <div className="glass-card p-12 text-center">
-              <FileCheck className="w-12 h-12 text-brand-mid/30 mx-auto mb-4" />
+              <FileCheck className="w-12 h-12 text-white/30 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-text-primary mb-2">No Documents</h3>
               <p className="text-text-muted text-sm">
                 Upload a document above to begin verification.
@@ -196,8 +196,8 @@ export default function DocumentsPage() {
                   className="glass-card glass-card-hover p-5 w-full text-left flex items-center gap-4"
                 >
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: "rgba(124, 58, 237, 0.08)" }}>
-                    <FileText className="w-6 h-6 text-brand-light/60" />
+                    style={{ background: "rgba(255, 255, 255, 0.05)" }}>
+                    <FileText className="w-6 h-6 text-text-secondary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-text-primary truncate">{doc.filename}</p>
@@ -283,7 +283,7 @@ export default function DocumentsPage() {
                     <Hash className="w-3.5 h-3.5 text-text-muted" />
                     <span className="text-xs text-text-muted uppercase tracking-wider">SHA-256 Hash</span>
                   </div>
-                  <p className="text-xs font-mono text-brand-light break-all">{selectedDoc.hash}</p>
+                  <p className="text-xs font-mono text-text-secondary break-all">{selectedDoc.hash}</p>
                 </div>
 
                 {/* Findings */}

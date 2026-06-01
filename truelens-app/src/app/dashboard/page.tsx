@@ -117,7 +117,7 @@ export default function DashboardPage() {
           transition={{ delay: 0.4 }}
         >
           <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <span className="w-1.5 h-5 rounded-full bg-brand-mid" />
+            <span className="w-1.5 h-5 rounded-full bg-text-primary" />
             Scan History
           </h2>
 
@@ -129,7 +129,7 @@ export default function DashboardPage() {
             </div>
           ) : scans.length === 0 ? (
             <div className="glass-card p-12 text-center">
-              <Shield className="w-12 h-12 text-brand-mid/30 mx-auto mb-4" />
+              <Shield className="w-12 h-12 text-white/30 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-text-primary mb-2">No Scans Yet</h3>
               <p className="text-text-muted text-sm mb-6">
                 Start scanning content to see your history here.
@@ -188,7 +188,7 @@ export default function DashboardPage() {
                     {getScoreLabel(scan.trustScore)}
                   </span>
 
-                  <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-brand-light transition-colors shrink-0" />
+                  <ArrowRight className="w-4 h-4 text-text-muted group-hover:text-text-primary transition-colors shrink-0" />
                 </motion.button>
               ))}
             </div>

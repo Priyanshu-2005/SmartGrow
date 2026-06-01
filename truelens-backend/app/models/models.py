@@ -1,10 +1,31 @@
-from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Enum, Text, JSON, Boolean
+from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, Enum, Text, Boolean
 from sqlalchemy.orm import relationship
+from sqlalchemy.types import TypeDecorator, TEXT
 from datetime import datetime, timezone
 import uuid
 import enum
+import json
 
 from app.core.database import Base
+
+class JSONEncodedDict(TypeDecorator):
+    """Represents an immutable structure as a json-encoded string."""
+    impl = TEXT
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            value = json.dumps(value)
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            if isinstance(value, str):
+                try:
+                    value = json.loads(value)
+                except json.JSONDecodeError:
+                    pass
+        return value
 
 def generate_uuid():
     return str(uuid.uuid4())
@@ -25,24 +46,13 @@ class VerdictEnum(str, enum.Enum):
     suspicious = "Suspicious"
     ai_generated = "AI-Generated"
 
-class User(Base):
-    __tablename__ = "users"
 
-    id = Column(String, primary_key=True, default=generate_uuid)
-    email = Column(String, unique=True, index=True, nullable=False)
-    name = Column(String, nullable=False)
-    plan = Column(String, default="free")
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-
-    scans = relationship("Scan", back_populates="user")
-    documents = relationship("Document", back_populates="user")
 
 
 class Scan(Base):
     __tablename__ = "scans"
 
     id = Column(String, primary_key=True, default=generate_uuid)
-    user_id = Column(String, ForeignKey("users.id"), nullable=True)
     url = Column(String, nullable=True)
     content_type = Column(Enum(ContentTypeEnum), nullable=False)
     raw_text = Column(Text, nullable=True)
@@ -54,7 +64,6 @@ class Scan(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     completed_at = Column(DateTime, nullable=True)
 
-    user = relationship("User", back_populates="scans")
     signals = relationship("Signal", back_populates="scan", cascade="all, delete-orphan")
 
 
@@ -67,8 +76,8 @@ class Signal(Base):
     score = Column(Integer, nullable=False)
     label = Column(String, nullable=False)
     confidence = Column(Float, nullable=False)
-    evidence = Column(JSON, nullable=True) # stores JSON breakdown
-    highlights = Column(JSON, nullable=True) # stores array of strings
+    evidence = Column(JSONEncodedDict, nullable=True) # stores JSON breakdown
+    highlights = Column(JSONEncodedDict, nullable=True) # stores array of strings
 
     scan = relationship("Scan", back_populates="signals")
 
@@ -77,14 +86,13 @@ class Document(Base):
     __tablename__ = "documents"
 
     id = Column(String, primary_key=True, default=generate_uuid)
-    user_id = Column(String, ForeignKey("users.id"), nullable=True)
     filename = Column(String, nullable=False)
     file_size = Column(Integer, nullable=False)
     file_type = Column(String, nullable=False)
     hash = Column(String, nullable=False, index=True)
     status = Column(String, default="pending")
     trust_score = Column(Integer, nullable=True)
-    findings = Column(JSON, nullable=True) # stores array of document findings
+    findings = Column(JSONEncodedDict, nullable=True) # stores array of document findings
     
     # Signature info
     signature = Column(String, nullable=True)
@@ -92,5 +100,3 @@ class Document(Base):
     verified_at = Column(DateTime, nullable=True)
 
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-
-    user = relationship("User", back_populates="documents")

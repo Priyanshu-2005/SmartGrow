@@ -29,12 +29,13 @@ export default function VerifyPage() {
   const [result, setResult] = useState<VerificationResult | null>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
 
+  const [file, setFile] = useState<File | null>(null);
+
   // Initialize scanner
   const startScanner = () => {
     setScannerOpen(true);
     setResult(null);
     
-    // Slight delay to allow DOM to render the scanner div
     setTimeout(() => {
       const scanner = new Html5QrcodeScanner(
         "reader",
@@ -44,14 +45,11 @@ export default function VerifyPage() {
       
       scanner.render(
         (decodedText) => {
-          // If URL like https://truelens.app/verify?hash=..., extract hash
           const hashMatch = decodedText.match(/hash=([a-f0-9]{64})/i);
           const val = hashMatch ? hashMatch[1] : decodedText;
           setInput(val);
           scanner.clear();
           setScannerOpen(false);
-          // auto submit
-          verifyInput(val);
         },
         (error) => {
           // parse errors ignore
@@ -61,20 +59,18 @@ export default function VerifyPage() {
   };
 
   const handleVerify = async () => {
-    verifyInput(input);
-  };
-
-  const verifyInput = async (valToVerify: string) => {
-    if (!valToVerify.trim()) return;
+    if (!input.trim() || !file) return;
     setLoading(true);
     setResult(null);
 
     try {
-      const isHash = valToVerify.length === 64 && /^[a-f0-9]+$/.test(valToVerify);
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("original_hash", input.trim());
+
       const res = await fetch("/api/v1/verify", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(isHash ? { hash: valToVerify } : { scanId: valToVerify }),
+        body: formData,
       });
       const data = await res.json();
       setResult(data);
@@ -139,15 +135,29 @@ export default function VerifyPage() {
               <QrCode className="w-5 h-5 text-text-secondary" />
             </button>
           </div>
+          <p className="text-xs text-text-muted mt-2 mb-4">
+            Enter the document's original SHA-256 hash or scan ID
+          </p>
+
+          <label className="text-sm font-medium text-text-secondary mb-2 block">
+            Document File
+          </label>
+          <div className="flex gap-2 relative">
+            <input
+              type="file"
+              onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+              className="w-full text-sm text-text-secondary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white/10 file:text-text-primary hover:file:bg-white/20 transition-colors"
+            />
+          </div>
           <p className="text-xs text-text-muted mt-2">
-            Enter the document&apos;s SHA-256 hash or TrueLens scan ID to verify its authenticity
+            Upload the document to verify its integrity against the hash
           </p>
 
           {scannerOpen && (
             <div className="mt-4 p-2 bg-white/5 rounded-lg border border-white/10">
               <div className="flex justify-between items-center mb-2 px-2">
                 <span className="text-sm text-text-secondary">Scan QR Code</span>
-                <button onClick={() => setScannerOpen(false)} className="text-xs text-brand-light hover:underline">Close</button>
+                <button onClick={() => setScannerOpen(false)} className="text-xs text-text-secondary hover:underline">Close</button>
               </div>
               <div id="reader" className="w-full rounded overflow-hidden"></div>
             </div>
@@ -162,7 +172,7 @@ export default function VerifyPage() {
         >
           <button
             onClick={handleVerify}
-            disabled={loading || !input.trim()}
+            disabled={loading || !input.trim() || !file}
             className="btn-primary w-full justify-center text-base !py-4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
@@ -253,7 +263,7 @@ export default function VerifyPage() {
 
                     <div className="p-4 rounded-lg" style={{ background: "rgba(255,255,255,0.02)" }}>
                       <p className="text-[10px] text-text-muted uppercase tracking-wider mb-1">Document Hash</p>
-                      <p className="text-xs font-mono text-brand-light break-all">{result.document.hash}</p>
+                      <p className="text-xs font-mono text-text-secondary break-all">{result.document.hash}</p>
                     </div>
 
                     {result.verified && (
@@ -262,7 +272,7 @@ export default function VerifyPage() {
                           href={`http://127.0.0.1:8000/api/v1/documents/${result.document.hash}/evidence`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-brand-mid/20 text-brand-light border border-brand-mid/30 rounded-lg hover:bg-brand-mid/30 transition-colors text-sm font-medium"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 text-text-primary border border-white/20 rounded-lg hover:bg-white/20 transition-colors text-sm font-medium"
                         >
                           <Download className="w-4 h-4" />
                           Download Evidence Pack
@@ -286,7 +296,7 @@ export default function VerifyPage() {
           <p className="text-xs text-text-muted mb-2">Try verifying:</p>
           <button
             onClick={() => setInput("doc_demo_001")}
-            className="text-xs text-brand-light/60 hover:text-brand-light transition-colors font-mono"
+            className="text-xs text-text-secondary hover:text-text-primary transition-colors font-mono"
           >
             doc_demo_001
           </button>

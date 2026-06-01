@@ -19,13 +19,13 @@ export default function ScanLoader() {
         }}
       >
         <div className="w-24 h-24 rounded-full flex items-center justify-center relative"
-          style={{ background: "rgba(124, 58, 237, 0.1)" }}>
-          <Shield className="w-12 h-12 text-brand-mid" />
+          style={{ background: "rgba(255, 255, 255, 0.05)" }}>
+          <Shield className="w-12 h-12 text-text-primary" />
           
           {/* Scanning ring */}
           <motion.div
             className="absolute inset-0 rounded-full"
-            style={{ border: "2px solid rgba(124, 58, 237, 0.3)" }}
+            style={{ border: "2px solid rgba(255, 255, 255, 0.1)" }}
             animate={{
               scale: [1, 1.5],
               opacity: [0.8, 0],
@@ -38,7 +38,7 @@ export default function ScanLoader() {
           />
           <motion.div
             className="absolute inset-0 rounded-full"
-            style={{ border: "2px solid rgba(124, 58, 237, 0.3)" }}
+            style={{ border: "2px solid rgba(255, 255, 255, 0.1)" }}
             animate={{
               scale: [1, 1.5],
               opacity: [0.8, 0],
@@ -52,7 +52,7 @@ export default function ScanLoader() {
           />
           <motion.div
             className="absolute inset-0 rounded-full"
-            style={{ border: "2px solid rgba(124, 58, 237, 0.3)" }}
+            style={{ border: "2px solid rgba(255, 255, 255, 0.1)" }}
             animate={{
               scale: [1, 1.5],
               opacity: [0.8, 0],
@@ -97,7 +97,7 @@ export default function ScanLoader() {
             className="flex items-center gap-3"
           >
             <motion.div
-              className="w-2 h-2 rounded-full bg-brand-mid"
+              className="w-2 h-2 rounded-full bg-text-primary"
               animate={{ opacity: [0.3, 1, 0.3] }}
               transition={{
                 duration: 1.5,

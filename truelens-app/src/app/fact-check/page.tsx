@@ -126,7 +126,7 @@ export default function FactCheckPage() {
         {/* Header & Search */}
         <div className="mb-10 text-center">
           <div className="w-12 h-12 bg-surface-dark border border-border-color rounded-xl flex items-center justify-center mx-auto mb-4">
-            <ShieldQuestion className="w-6 h-6 text-brand-mid" />
+            <ShieldQuestion className="w-6 h-6 text-text-primary" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">Fact Check Portal</h1>
           <p className="text-text-muted mb-8">Enter a claim to get an instant AI verdict and view related historical fact-checks.</p>
@@ -138,13 +138,13 @@ export default function FactCheckPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="e.g., Did Rishi Kapoor die?"
-              className="w-full bg-surface-dark border border-border-color text-text-primary rounded-lg pl-12 pr-28 py-4 focus:outline-none focus:border-brand-mid transition-colors"
+              className="w-full bg-surface-dark border border-border-color text-text-primary rounded-lg pl-12 pr-28 py-4 focus:outline-none focus:border-text-primary transition-colors"
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
             <button
               onClick={handleSearch}
               disabled={loading}
-              className="absolute right-2 bg-brand-mid text-white font-medium py-2 px-5 rounded-md hover:bg-brand-light disabled:opacity-50 transition-colors"
+              className="absolute right-2 bg-text-primary text-black font-medium py-2 px-5 rounded-md hover:bg-text-secondary disabled:opacity-50 transition-colors"
             >
               Verify
             </button>
@@ -230,7 +230,7 @@ export default function FactCheckPage() {
                                   href={source.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-background-dark border border-border-color rounded-md text-xs text-text-secondary hover:text-brand-light hover:border-brand-mid/50 transition-colors"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-background-dark border border-border-color rounded-md text-xs text-text-secondary hover:text-text-primary hover:border-white/20 transition-colors"
                                 >
                                   {source.title.length > 35 ? source.title.substring(0, 35) + "..." : source.title}
                                   <ExternalLink className="w-3 h-3" />
@@ -316,7 +316,7 @@ export default function FactCheckPage() {
                                   href={review.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-[11px] font-medium text-brand-light hover:text-brand-mid transition-colors flex items-center gap-1"
+                                  className="text-[11px] font-medium text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1"
                                 >
                                   Source Link <ExternalLink className="w-3 h-3" />
                                 </a>

@@ -88,9 +88,30 @@ export async function GET() {
       completedAt: d.completed_at
     }));
 
+    // Compute stats
+    let avgScore = 0;
+    let flaggedCount = 0;
+    let authenticCount = 0;
+
+    if (scans.length > 0) {
+      const totalScore = scans.reduce((sum: number, scan: any) => sum + (scan.trustScore || 0), 0);
+      avgScore = Math.round(totalScore / scans.length);
+      
+      scans.forEach((scan: any) => {
+        if (scan.verdict === "Flagged" || scan.trustScore < 40) flaggedCount++;
+        else if (scan.verdict === "Authentic" || scan.trustScore >= 70) authenticCount++;
+      });
+    }
+
     return NextResponse.json({
       scans,
       total: scans.length,
+      stats: {
+        totalScans: scans.length,
+        avgScore,
+        flaggedCount,
+        authenticCount
+      }
     });
   } catch (error) {
     console.error("Error fetching scans:", error);

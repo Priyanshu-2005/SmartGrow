@@ -112,11 +112,11 @@ export default function ResultsPage({ params }: { params: Promise<{ id: string }
         >
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: "rgba(124, 58, 237, 0.1)", border: "1px solid rgba(124, 58, 237, 0.2)" }}>
+              style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
               {scan.contentType === "url" ? (
-                <Globe className="w-5 h-5 text-brand-mid" />
+                <Globe className="w-5 h-5 text-text-primary" />
               ) : (
-                <FileText className="w-5 h-5 text-brand-mid" />
+                <FileText className="w-5 h-5 text-text-primary" />
               )}
             </div>
             <div className="flex-1 min-w-0">
@@ -128,7 +128,7 @@ export default function ResultsPage({ params }: { params: Promise<{ id: string }
                   href={scan.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-brand-light hover:text-brand-mid transition-colors text-sm flex items-center gap-1 break-all"
+                  className="text-text-secondary hover:text-text-primary transition-colors text-sm flex items-center gap-1 break-all"
                 >
                   {scan.url}
                   <ExternalLink className="w-3.5 h-3.5 shrink-0" />
@@ -168,7 +168,7 @@ export default function ResultsPage({ params }: { params: Promise<{ id: string }
           transition={{ delay: 0.4 }}
         >
           <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <span className="w-1.5 h-5 rounded-full bg-brand-mid" />
+            <span className="w-1.5 h-5 rounded-full bg-text-primary" />
             Signal Breakdown
           </h2>
           <div className="space-y-3">
@@ -186,7 +186,7 @@ export default function ResultsPage({ params }: { params: Promise<{ id: string }
           className="mt-8 text-center"
         >
           <p className="text-xs text-text-muted">
-            Scan ID: <span className="font-mono text-brand-light">{scan.id}</span>
+            Scan ID: <span className="font-mono text-text-secondary">{scan.id}</span>
           </p>
         </motion.div>
       </div>

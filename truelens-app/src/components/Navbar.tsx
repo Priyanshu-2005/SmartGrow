@@ -11,6 +11,7 @@ import {
 
 const navLinks = [
   { href: "/scan", label: "Scan", icon: Scan },
+  { href: "/image-verify", label: "Image Verify", icon: Scan },
   { href: "/fact-check", label: "Fact Check", icon: ShieldQuestion },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/documents", label: "Documents", icon: FileCheck },
@@ -29,10 +30,9 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="relative">
-              <Shield className="w-8 h-8 text-brand-mid transition-colors group-hover:text-brand-light" />
-              <div className="absolute inset-0 blur-lg bg-brand-mid/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Shield className="w-8 h-8 text-text-primary transition-colors group-hover:text-text-secondary" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-brand-light to-brand-mid bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-text-primary">
               TrueLens
             </span>
           </Link>
@@ -47,7 +47,7 @@ export default function Navbar() {
                   href={link.href}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     isActive
-                      ? "text-brand-light bg-brand-mid/10"
+                      ? "text-text-primary bg-white/10"
                       : "text-text-muted hover:text-text-primary hover:bg-white/5"
                   }`}
                 >
@@ -60,13 +60,6 @@ export default function Navbar() {
 
           {/* Right side */}
           <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/login"
-              className="btn-secondary text-sm !py-2 !px-4"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Sign In</span>
-            </Link>
             <Link
               href="/scan"
               className="btn-primary text-sm !py-2 !px-5"
@@ -105,7 +98,7 @@ export default function Navbar() {
                     onClick={() => setMobileOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
                       isActive
-                        ? "text-brand-light bg-brand-mid/10"
+                        ? "text-text-primary bg-white/10"
                         : "text-text-muted hover:text-text-primary hover:bg-white/5"
                     }`}
                   >
@@ -115,14 +108,6 @@ export default function Navbar() {
                 );
               })}
               <div className="pt-3 border-t border-border-color mt-3 space-y-2">
-                <Link
-                  href="/login"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-medium text-text-muted border border-border-color hover:border-brand-mid"
-                >
-                  <LogIn className="w-4 h-4" />
-                  Sign In
-                </Link>
                 <Link
                   href="/scan"
                   onClick={() => setMobileOpen(false)}

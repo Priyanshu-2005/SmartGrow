@@ -18,6 +18,8 @@ from app.services.document_signing import generate_document_hash, sign_document_
 from app.services.document_analysis import analyze_document
 from app.services.image_analysis import analyze_image
 from app.services.evidence_pack import generate_evidence_pack
+from app.services.pdf_report import generate_pdf_report
+from fastapi.responses import Response
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -156,8 +158,108 @@ async def verify_and_sign_document(file: UploadFile = File(...), db: Session = D
         db.rollback()
         logger.error(f"Document verification error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+        await file.close()
+
+from fastapi import Form
+
+@router.post("/verify-hash", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
+async def verify_hash_and_document(
+    file: UploadFile = File(...), 
+    original_hash: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    """
+    Accepts a file upload and an original SHA-256 hash.
+    Computes the hash of the uploaded file and compares them.
+    If they match, status is authentic. If not, it runs full tamper analysis.
+    """
+    try:
+        contents = await file.read()
+        file_size = len(contents)
+        
+        if file_size > MAX_FILE_SIZE:
+            raise HTTPException(status_code=400, detail="File too large. Max 10MB.")
+            
+        filename = file.filename or "unknown"
+        
+        # Generate hash of uploaded file
+        computed_hash = generate_document_hash(contents)
+        
+        findings = []
+        trust_score = 100
+        
+        if computed_hash == original_hash:
+            status_val = "verified"
+            findings.append({
+                "type": "Hash Match",
+                "severity": "info",
+                "message": "Computed hash perfectly matches the original hash."
+            })
+        else:
+            status_val = "flagged"
+            trust_score = 10  # Very low trust if hashes don't match
+            findings.append({
+                "type": "Hash Mismatch",
+                "severity": "high",
+                "message": f"Computed hash ({computed_hash[:8]}...) does NOT match original hash ({original_hash[:8]}...)."
+            })
+            
+            # Since it's tampered, let's run deep analysis to find out why
+            file_type = file.content_type or "application/octet-stream"
+            ext = '.' + filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+            
+            try:
+                analysis_result = analyze_document(contents, filename, file_type)
+                findings.extend(analysis_result["findings"])
+                
+                if ext in IMAGE_EXTENSIONS:
+                    image_signals = analyze_image(contents)
+                    for signal in image_signals:
+                        findings.append({
+                            "type": signal["label"],
+                            "severity": "high" if signal["score"] > 60 else ("medium" if signal["score"] > 35 else "low"),
+                            "message": signal["highlights"][0] if signal["highlights"] else f"Score: {signal['score']}/100",
+                        })
+            except Exception as e:
+                logger.warning(f"Secondary analysis failed after hash mismatch: {e}")
+                
+        # Sign the document if it passed verification
+        signature_data = {"signature": None, "public_key": None, "timestamp": None}
+        if status_val == "verified":
+            signature_data = sign_document_hash(computed_hash)
+            
+        # Store in database
+        doc_id = str(uuid.uuid4())
+        db_doc = Document(
+            id=doc_id,
+            filename=filename,
+            file_size=file_size,
+            file_type=file.content_type or "application/octet-stream",
+            hash=computed_hash,
+            status=status_val,
+            trust_score=trust_score,
+            findings=findings,
+            signature=signature_data.get("signature"),
+            public_key=signature_data.get("public_key"),
+            verified_at=signature_data.get("timestamp"),
+        )
+        
+        db.add(db_doc)
+        db.commit()
+        db.refresh(db_doc)
+        
+        return db_doc
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Document hash verification error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         await file.close()
+
+
 
 
 @router.get("/{doc_hash}", response_model=DocumentResponse)
@@ -197,3 +299,26 @@ def list_documents(skip: int = 0, limit: int = 20, db: Session = Depends(get_db)
     """
     docs = db.query(Document).order_by(Document.created_at.desc()).offset(skip).limit(limit).all()
     return docs
+
+@router.get("/{doc_hash}/report")
+def get_pdf_report(doc_hash: str, db: Session = Depends(get_db)):
+    """
+    Generates and returns a downloadable PDF verification report.
+    """
+    doc = db.query(Document).filter(Document.hash == doc_hash).first()
+    if not doc:
+        doc = db.query(Document).filter(Document.id == doc_hash).first()
+        
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+        
+    pdf_bytes = generate_pdf_report(doc)
+    
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=TrueLens_Report_{doc.id[:8]}.pdf"
+        }
+    )
+

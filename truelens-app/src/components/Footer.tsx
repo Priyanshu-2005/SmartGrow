@@ -9,8 +9,8 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
-              <Shield className="w-7 h-7 text-brand-mid" />
-              <span className="text-lg font-bold bg-gradient-to-r from-brand-light to-brand-mid bg-clip-text text-transparent">
+              <Shield className="w-7 h-7 text-text-primary" />
+              <span className="text-lg font-bold text-text-primary">
                 TrueLens
               </span>
             </Link>
@@ -18,13 +18,13 @@ export default function Footer() {
               Verifying authenticity in the age of AI. Making the internet more trustworthy, one scan at a time.
             </p>
             <div className="flex items-center gap-3 mt-4">
-              <a href="#" className="text-text-muted hover:text-brand-light transition-colors">
+              <a href="#" className="text-text-muted hover:text-text-primary transition-colors">
                 <Code2 className="w-5 h-5" />
               </a>
-              <a href="#" className="text-text-muted hover:text-brand-light transition-colors">
+              <a href="#" className="text-text-muted hover:text-text-primary transition-colors">
                 <Rss className="w-5 h-5" />
               </a>
-              <a href="#" className="text-text-muted hover:text-brand-light transition-colors">
+              <a href="#" className="text-text-muted hover:text-text-primary transition-colors">
                 <Mail className="w-5 h-5" />
               </a>
             </div>
@@ -41,7 +41,7 @@ export default function Footer() {
                 { href: "/verify", label: "Verify Document" },
               ].map(link => (
                 <li key={link.href}>
-                  <Link href={link.href} className="text-text-muted text-sm hover:text-brand-light transition-colors">
+                  <Link href={link.href} className="text-text-muted text-sm hover:text-text-primary transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -55,7 +55,7 @@ export default function Footer() {
             <ul className="space-y-2.5">
               {["About", "Blog", "Careers", "Contact"].map(item => (
                 <li key={item}>
-                  <a href="#" className="text-text-muted text-sm hover:text-brand-light transition-colors">
+                  <a href="#" className="text-text-muted text-sm hover:text-text-primary transition-colors">
                     {item}
                   </a>
                 </li>
@@ -69,7 +69,7 @@ export default function Footer() {
             <ul className="space-y-2.5">
               {["Privacy Policy", "Terms of Service", "Cookie Policy", "API Terms"].map(item => (
                 <li key={item}>
-                  <a href="#" className="text-text-muted text-sm hover:text-brand-light transition-colors">
+                  <a href="#" className="text-text-muted text-sm hover:text-text-primary transition-colors">
                     {item}
                   </a>
                 </li>

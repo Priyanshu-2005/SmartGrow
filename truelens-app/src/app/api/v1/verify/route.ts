@@ -1,69 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dataStore } from "@/lib/store";
 
-// POST /api/v1/verify — Verify a document by hash or scanId
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-    const { hash, scanId } = body;
+    const formData = await req.formData();
+    
+    // Fallback URL if env is not defined
+    const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:8000";
 
-    if (!hash && !scanId) {
-      return NextResponse.json(
-        { error: "Provide either a document hash or scanId for verification." },
-        { status: 400 }
-      );
-    }
-
-    const documents = dataStore.getAllDocuments();
-    let doc;
-
-    if (scanId) {
-      doc = documents.find(d => d.id === scanId);
-    } else if (hash) {
-      doc = documents.find(d => d.hash === hash);
-    }
-
-    if (!doc) {
-      return NextResponse.json({
-        verified: false,
-        message: "No matching document found in TrueLens records.",
-      });
-    }
-
-    if (doc.signature && doc.status === "verified") {
-      return NextResponse.json({
-        verified: true,
-        document: {
-          id: doc.id,
-          filename: doc.filename,
-          hash: doc.hash,
-          trustScore: doc.trustScore,
-          status: doc.status,
-          verifiedAt: doc.signature.timestamp,
-          signatureValid: true,
-        },
-        message: "Document is verified and has a valid TrueLens signature.",
-      });
-    }
-
-    return NextResponse.json({
-      verified: false,
-      document: {
-        id: doc.id,
-        filename: doc.filename,
-        hash: doc.hash,
-        trustScore: doc.trustScore,
-        status: doc.status,
-      },
-      message: doc.status === "flagged"
-        ? "Document has been flagged for potential tampering."
-        : "Document found but not yet verified.",
+    const response = await fetch(`${BACKEND_URL}/api/v1/documents/verify-hash`, {
+      method: "POST",
+      body: formData,
     });
+
+    const data = await response.json();
+    
+    if (response.ok) {
+      return NextResponse.json({
+        verified: data.status === "verified",
+        document: data,
+        message: data.status === "verified" ? "Document Verified ✓" : "Verification Failed: Hash Mismatch or Tampering Detected",
+      }, { status: 200 });
+    }
+    
+    return NextResponse.json(data, { status: response.status });
   } catch (error) {
-    console.error("Verification error:", error);
+    console.error("Verification proxy error:", error);
     return NextResponse.json(
-      { error: "Verification failed." },
-      { status: 500 }
+      { error: "Verification failed to connect to backend." },
+      { status: 502 }
     );
   }
 }

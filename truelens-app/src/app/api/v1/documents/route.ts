@@ -75,13 +75,41 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET /api/v1/documents — List all documents (Wait, backend doesn't have a list endpoint yet, I will mock it temporarily or implement it)
-// For now, let's keep the backend sync, or just return an empty array if not implemented.
-export async function GET() {
+// GET /api/v1/documents — List all documents
+export async function GET(request: NextRequest) {
   try {
-    // We haven't built the list endpoint in FastAPI yet, returning empty for UI safety
-    // Or we could fetch from dataStore if we want to mix states, but let's be clean.
-    return NextResponse.json({ documents: [], total: 0 });
+    const { searchParams } = new URL(request.url);
+    const skip = searchParams.get('skip') || '0';
+    const limit = searchParams.get('limit') || '20';
+
+    const response = await fetch(`${BACKEND_URL}/api/v1/documents/?skip=${skip}&limit=${limit}`, {
+      method: "GET",
+    });
+
+    if (!response.ok) {
+      throw new Error(`Backend returned ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    // Map FastAPI snake_case response to Next.js camelCase expectations
+    const documents = data.map((doc: any) => ({
+      ...doc,
+      fileSize: doc.file_size,
+      fileType: doc.file_type,
+      trustScore: doc.trust_score,
+      createdAt: doc.created_at,
+      signature: doc.signature ? {
+        documentHash: doc.hash,
+        signature: doc.signature,
+        publicKey: doc.public_key,
+        timestamp: doc.verified_at,
+        scanId: doc.id,
+        verdict: doc.status,
+      } : undefined
+    }));
+
+    return NextResponse.json({ documents, total: documents.length });
   } catch (error) {
     console.error("Error fetching documents:", error);
     return NextResponse.json(

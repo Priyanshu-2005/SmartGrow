@@ -23,7 +23,7 @@ python-multipart==0.0.9
 # ── Image Forensics & Utilities ──
 pillow==10.2.0
 exifread==3.0.0
-numpy>=1.24.0
+numpy<2
 qrcode[pil]==8.2
 
 # ── AI / Gemini ──
@@ -32,6 +32,7 @@ wikipedia>=1.4.0
 
 # ── ML / AI Text Detection (Transformer + Stylometry Ensemble) ──
 torch>=2.1.0
+torchvision>=0.16.0
 transformers>=4.36.0
 
 # ── Document Analysis ──
@@ -43,3 +44,6 @@ python-whois==0.8.0
 
 # ── Cryptographic Signing ──
 cryptography==42.0.2
+
+# ── Reporting ──
+reportlab>=4.0.0

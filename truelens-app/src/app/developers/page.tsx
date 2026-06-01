@@ -117,8 +117,8 @@ export default function DevelopersPage() {
         >
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-              style={{ background: "rgba(124, 58, 237, 0.1)", border: "1px solid rgba(124, 58, 237, 0.2)" }}>
-              <Code2 className="w-6 h-6 text-brand-mid" />
+              style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
+              <Code2 className="w-6 h-6 text-text-primary" />
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-text-primary">Developer Portal</h1>
@@ -135,7 +135,7 @@ export default function DevelopersPage() {
           className="glass-card p-8 mb-8"
         >
           <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-brand-mid" />
+            <Zap className="w-5 h-5 text-text-primary" />
             Quick Start
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -160,8 +160,8 @@ export default function DevelopersPage() {
               },
             ].map((item) => (
               <div key={item.step} className="flex gap-4">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold text-brand-mid"
-                  style={{ background: "rgba(124, 58, 237, 0.1)" }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold text-text-primary"
+                  style={{ background: "rgba(255, 255, 255, 0.05)" }}>
                   {item.step}
                 </div>
                 <div>
@@ -182,7 +182,7 @@ export default function DevelopersPage() {
         >
           <div className="flex items-center justify-between p-4 border-b border-border-color">
             <h2 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-brand-mid" />
+              <BookOpen className="w-4 h-4 text-text-primary" />
               Code Examples
             </h2>
             <div className="flex gap-1">
@@ -192,7 +192,7 @@ export default function DevelopersPage() {
                   onClick={() => setActiveTab(tab)}
                   className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                     activeTab === tab
-                      ? "bg-brand-mid/15 text-brand-light"
+                      ? "bg-white/10 text-text-secondary"
                       : "text-text-muted hover:text-text-secondary"
                   }`}
                 >
@@ -208,7 +208,7 @@ export default function DevelopersPage() {
             >
               {copiedEndpoint === "code" ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
             </button>
-            <pre className="p-5 overflow-x-auto text-sm font-mono text-brand-light leading-relaxed">
+            <pre className="p-5 overflow-x-auto text-sm font-mono text-text-secondary leading-relaxed">
               {codeExamples[activeTab]}
             </pre>
           </div>
@@ -221,7 +221,7 @@ export default function DevelopersPage() {
           transition={{ delay: 0.3 }}
         >
           <h2 className="text-lg font-semibold text-text-primary mb-4 flex items-center gap-2">
-            <span className="w-1.5 h-5 rounded-full bg-brand-mid" />
+            <span className="w-1.5 h-5 rounded-full bg-text-primary" />
             API Endpoints
           </h2>
 
@@ -245,7 +245,7 @@ export default function DevelopersPage() {
                     >
                       {endpoint.method}
                     </span>
-                    <code className="text-sm font-mono text-brand-light">{endpoint.path}</code>
+                    <code className="text-sm font-mono text-text-secondary">{endpoint.path}</code>
                   </div>
                   <p className="text-sm text-text-muted">{endpoint.description}</p>
                 </div>
@@ -275,7 +275,7 @@ export default function DevelopersPage() {
           className="mt-12"
         >
           <h2 className="text-lg font-semibold text-text-primary mb-6 flex items-center gap-2">
-            <span className="w-1.5 h-5 rounded-full bg-brand-mid" />
+            <span className="w-1.5 h-5 rounded-full bg-text-primary" />
             API Pricing
           </h2>
 
@@ -338,7 +338,7 @@ export default function DevelopersPage() {
                 <ul className="space-y-3 mb-6">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-text-secondary">
-                      <Check className="w-4 h-4 text-brand-mid shrink-0" />
+                      <Check className="w-4 h-4 text-text-primary shrink-0" />
                       {f}
                     </li>
                   ))}

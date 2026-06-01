@@ -84,8 +84,8 @@ export default function ScanPage() {
           className="text-center mb-12"
         >
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
-            style={{ background: "rgba(124, 58, 237, 0.1)", border: "1px solid rgba(124, 58, 237, 0.2)" }}>
-            <Scan className="w-8 h-8 text-brand-mid" />
+            style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
+            <Scan className="w-8 h-8 text-text-primary" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-text-primary mb-3">
             Analyze Content
@@ -111,7 +111,7 @@ export default function ScanPage() {
               onClick={() => { setActiveTab(tab.id); setError(""); }}
               className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
                 activeTab === tab.id
-                  ? "bg-brand-mid/15 text-brand-light border border-brand-mid/30"
+                  ? "bg-white/10 text-text-primary border border-white/20"
                   : "text-text-muted hover:text-text-secondary hover:bg-white/[0.03]"
               }`}
             >
@@ -236,7 +236,7 @@ export default function ScanPage() {
                   <button
                     key={example}
                     onClick={() => setUrl(example)}
-                    className="px-3 py-1.5 rounded-lg text-xs text-text-muted hover:text-brand-light transition-colors"
+                    className="px-3 py-1.5 rounded-lg text-xs text-text-muted hover:text-text-primary transition-colors"
                     style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
                   >
                     {example}
@@ -248,7 +248,7 @@ export default function ScanPage() {
                   <button
                     key={i}
                     onClick={() => setText(example)}
-                    className="px-3 py-1.5 rounded-lg text-xs text-text-muted hover:text-brand-light transition-colors text-left max-w-md"
+                    className="px-3 py-1.5 rounded-lg text-xs text-text-muted hover:text-text-primary transition-colors text-left max-w-md"
                     style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
                   >
                     {example.substring(0, 80)}...
