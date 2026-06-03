@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import scans, documents, domains, reviews, news, fact_check, image_verification
+from app.api.v1.endpoints import scans, documents, domains, reviews, news, fact_check, image_verification, text_analyze
 
 api_router = APIRouter()
 api_router.include_router(scans.router, prefix="/scans", tags=["scans"])
@@ -9,3 +9,5 @@ api_router.include_router(reviews.router, prefix="/reviews", tags=["reviews"])
 api_router.include_router(news.router, prefix="/news", tags=["news"])
 api_router.include_router(fact_check.router, prefix="/fact-check", tags=["fact-check"])
 api_router.include_router(image_verification.router, prefix="/image-verify", tags=["image-verify"])
+api_router.include_router(text_analyze.router, prefix="/text-analyze", tags=["text-analyze"])
+

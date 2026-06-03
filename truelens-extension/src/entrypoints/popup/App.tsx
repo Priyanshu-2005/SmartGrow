@@ -1,427 +1,185 @@
-import { useEffect, useState, useCallback } from "react";
-
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import GMLogo from "@/assets/icon.png";
-import {
-  BookA,
-  BookOpenText,
-  BotMessageSquare,
-  Brain,
-  Cog,
-  Highlighter,
-  Pencil,
-  Rose,
-  Type,
-} from "lucide-react";
-import { ColorProfile, DEFAULT_COLOR_PROFILES } from "@/utils/messages";
-import type { AccessibilityScore } from "@/utils/messages";
-import { AccessibilityScoreSection } from "./AccessibilityScore";
+import TLLogo from "@/assets/icon.png";
+import { Shield, CircleDot, Settings, Save } from "lucide-react";
 
-const PROFILES = [
-  { id: "none", label: "Default", emoji: "🔆" },
-  { id: "soft", label: "Soft", emoji: "☁️" },
-  { id: "warm", label: "Warm", emoji: "🌅" },
-  { id: "cool", label: "Cool", emoji: "🌊" },
-  { id: "mono", label: "Mono", emoji: "⬜" },
-  { id: "high-contrast", label: "Contrast", emoji: "⬛" },
-] as const;
-
-const FONTS = [
-  { id: "default", label: "Default Font" },
-  { id: "Lexend", label: "Lexend" },
-  { id: "OpenDyslexic", label: "OpenDyslexic" },
-  { id: "Comic Sans MS", label: "Comic Sans" },
-];
-
-/* ------------------------------------------------------ */
-/*                      Main app lol                      */
-/* ------------------------------------------------------ */
 export default function App() {
-  const [rewriteEnabled, setRewriteEnabled] = useState(false);
-  const [activeProfile, setActiveProfile] = useState<string>("none");
-  const [activeModel, setActiveModel] = useState<string>("");
-  const [activeFont, setActiveFont] = useState<string>("default");
-  const [rulerEnabled, setRulerEnabled] = useState(false);
-  const [readModeEnabled, setReadModeEnabled] = useState(false);
-  const [dictEnabled, setDictEnabled] = useState(false);
+  const [backendUrl, setBackendUrl] = useState("http://127.0.0.1:8000");
+  const [backendStatus, setBackendStatus] = useState<
+    "checking" | "connected" | "disconnected"
+  >("checking");
+  const [editing, setEditing] = useState(false);
+  const [tempUrl, setTempUrl] = useState("");
 
-  // load all settings from localStorage
   useEffect(() => {
     chrome.storage.local.get(
-      {
-        rewriteEnabled: false,
-        dictEnabled: false,
-        colorProfile: DEFAULT_COLOR_PROFILES.none,
-        activeModel: "",
-        activeFont: "default",
-      },
+      { backendUrl: "http://127.0.0.1:8000" },
       (res) => {
-        setRewriteEnabled(res.rewriteEnabled as boolean);
-        setDictEnabled(res.dictEnabled as boolean);
-        setActiveProfile((res.colorProfile as ColorProfile).id);
-        setActiveModel(res.activeModel as string);
-        setActiveFont(res.activeFont as string);
-        // rulerEnabled and readModeEnabled are tab-local, not restored from storage
+        setBackendUrl(res.backendUrl as string);
+        setTempUrl(res.backendUrl as string);
+        checkConnection(res.backendUrl as string);
       },
     );
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      if (!tab?.id) return;
-      chrome.tabs
-        .sendMessage(tab.id, { action: "GET_TAB_STATE" })
-        .then((state) => {
-          if (!state) return;
-          setRulerEnabled(state.rulerEnabled ?? false);
-          setReadModeEnabled(state.readModeEnabled ?? false);
-        })
-        .catch(() => {}); // tab may not have content script (e.g. chrome:// pages)
-    })();
-  }, []);
-
-  const setFont = async (value: string) => {
-    setActiveFont(value);
-    await chrome.storage.local.set({ activeFont: value });
-  };
-
-  const toggleRewrite = async () => {
-    const next = !rewriteEnabled;
-    setRewriteEnabled(next);
-    await chrome.storage.local.set({ rewriteEnabled: next });
-    const [tab] = await chrome.tabs.query({
-      active: true,
-      currentWindow: true,
-    });
-    if (tab?.id) {
-      chrome.tabs
-        .sendMessage(tab.id, {
-          action: "TOGGLE_REWRITE",
-          payload: { enabled: next },
-        })
-        .catch(() => {});
-    }
-  };
-
-  const toggleDict = async () => {
-    const next = !dictEnabled;
-    setDictEnabled(next);
-    await chrome.storage.local.set({ dictEnabled: next });
-  };
-
-
-  const setProfile = async (profileId: string) => {
-    const profile =
-      DEFAULT_COLOR_PROFILES[profileId as keyof typeof DEFAULT_COLOR_PROFILES];
-    if (!profile) return;
-    setActiveProfile(profileId);
-    await chrome.storage.local.set({ colorProfile: profile });
-    await chrome.runtime.sendMessage({
-      action: "SET_COLOR_PROFILE",
-      payload: profile,
-    });
-  };
-
-  const openOptions = async (tab?: string) => {
-    if (tab) await chrome.storage.local.set({ _openTab: tab });
-    chrome.tabs.create({ url: chrome.runtime.getURL("/options.html") });
-  };
-
-  const analyzeScore = useCallback(async (): Promise<AccessibilityScore> => {
+  const checkConnection = async (url: string) => {
+    setBackendStatus("checking");
     try {
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
+      const response = await chrome.runtime.sendMessage({
+        action: "PING",
       });
-      if (!tab?.id) throw new Error("No active tab found");
-
-      const result = await chrome.tabs.sendMessage(tab.id, {
-        action: "GET_ACCESSIBILITY_SCORE",
-      });
-
-      if (chrome.runtime.lastError) {
-        throw new Error(chrome.runtime.lastError.message);
-      }
-      if (!result) {
-        throw new Error("Content script not found. Try refreshing the page.");
-      }
-
-      if (result.error) throw new Error(result.error);
-      const accessibilityScore = result as AccessibilityScore;
-      return accessibilityScore;
-    } catch (e: unknown) {
-      let msg = e instanceof Error ? e.message : "Could not analyze this page";
-      if (
-        msg.includes("Receiving end does not exist") ||
-        msg.includes("Content script not found")
-      ) {
-        msg = "Script not loaded. Please refresh this page.";
-      } else if (msg.includes("Cannot access")) {
-        msg = "Cannot analyze system pages or new tabs.";
-      }
-      throw e;
-    } finally {
+      setBackendStatus(response?.ok ? "connected" : "disconnected");
+    } catch {
+      setBackendStatus("disconnected");
     }
-  }, []);
+  };
+
+  const saveUrl = async () => {
+    const cleanUrl = tempUrl.replace(/\/+$/, ""); // Remove trailing slashes
+    setBackendUrl(cleanUrl);
+    await chrome.storage.local.set({ backendUrl: cleanUrl });
+    setEditing(false);
+    checkConnection(cleanUrl);
+  };
+
+  const statusColor = {
+    checking: "text-yellow-500",
+    connected: "text-green-500",
+    disconnected: "text-red-500",
+  };
+
+  const statusLabel = {
+    checking: "Checking…",
+    connected: "Connected",
+    disconnected: "Disconnected",
+  };
 
   return (
-    <div className="dark" style={{ width: 350, minHeight: 300 }}>
+    <div className="dark" style={{ width: 360, minHeight: 280 }}>
       <div className="bg-background text-foreground flex h-full w-full flex-col font-sans">
         {/* Header */}
-        <div className="flex items-center gap-2 px-4 py-3">
-            <img 
-            src={GMLogo}
-            alt="GrayMatter Logo" 
+        <div className="flex items-center gap-2.5 px-4 py-3.5">
+          <img
+            src={TLLogo}
+            alt="TrueLens Logo"
             className="h-7 w-7 rounded-sm"
-            />
+          />
           <div>
-            <p className="text-[13px] leading-none font-semibold">GrayMatter</p>
+            <p className="text-[13px] leading-none font-semibold">TrueLens</p>
             <p className="text-muted-foreground mt-0.5 text-[10px]">
-              Cognitive Accessibility
+              Content Authenticity Verification
             </p>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground ml-auto h-auto px-2 py-1 text-xs"
-            onClick={() => openOptions()}
+          <Badge
+            variant="secondary"
+            className={`ml-auto text-[10px] ${statusColor[backendStatus]}`}
           >
-            Settings <Cog />
-          </Button>
+            <CircleDot className="mr-1 h-2.5 w-2.5" />
+            {statusLabel[backendStatus]}
+          </Badge>
         </div>
 
         <Separator />
 
-        {/* ------------ Cognitive Accessibility Score ----------- */}
-        <AccessibilityScoreSection onAnalyze={analyzeScore} />
+        {/* How to Use */}
+        <div className="px-4 py-3.5">
+          <div className="mb-2.5 flex items-center gap-1.5">
+            <Shield className="text-muted-foreground h-4 w-4" />
+            <Label className="text-[13px] font-medium">How to Use</Label>
+          </div>
+          <div className="space-y-2.5 text-[11px] leading-relaxed">
+            <div className="bg-muted/50 flex items-start gap-2.5 rounded-lg p-2.5">
+              <span className="mt-0.5 text-[13px]">1.</span>
+              <p className="text-muted-foreground">
+                <span className="text-foreground font-medium">
+                  Select any text
+                </span>{" "}
+                on a webpage (at least 20 characters)
+              </p>
+            </div>
+            <div className="bg-muted/50 flex items-start gap-2.5 rounded-lg p-2.5">
+              <span className="mt-0.5 text-[13px]">2.</span>
+              <p className="text-muted-foreground">
+                Click{" "}
+                <span className="text-foreground font-medium">
+                  Text Analysis
+                </span>{" "}
+                to check if text is AI-generated, or{" "}
+                <span className="text-foreground font-medium">Fact Check</span>{" "}
+                to verify claims
+              </p>
+            </div>
+            <div className="bg-muted/50 flex items-start gap-2.5 rounded-lg p-2.5">
+              <span className="mt-0.5 text-[13px]">3.</span>
+              <p className="text-muted-foreground">
+                Results appear inline. You can{" "}
+                <span className="text-foreground font-medium">minimize</span> or{" "}
+                <span className="text-foreground font-medium">close</span> them
+              </p>
+            </div>
+          </div>
+        </div>
 
-        {/* Model Status */}
-        <div className="flex items-center justify-between px-4 py-2.5">
-          <p className="text-muted-foreground text-[11px]">Active Model</p>
-          {activeModel ? (
-            <Badge
-              variant="secondary"
-              className="max-w-40 truncate text-[11px] text-green-400"
-            >
-              {activeModel.replace(/-MLC$/, "")}
-            </Badge>
+        <Separator />
+
+        {/* Backend URL Setting */}
+        <div className="px-4 py-3.5">
+          <div className="mb-2 flex items-center gap-1.5">
+            <Settings className="text-muted-foreground h-3.5 w-3.5" />
+            <Label className="text-[11px] font-medium tracking-wide uppercase">
+              Backend Server
+            </Label>
+          </div>
+
+          {editing ? (
+            <div className="flex gap-1.5">
+              <Input
+                value={tempUrl}
+                onChange={(e) => setTempUrl(e.target.value)}
+                className="h-8 text-[11px]"
+                placeholder="http://127.0.0.1:8000"
+                onKeyDown={(e) => e.key === "Enter" && saveUrl()}
+              />
+              <Button
+                size="sm"
+                variant="secondary"
+                className="h-8 px-2.5 text-[10px]"
+                onClick={saveUrl}
+              >
+                <Save className="mr-1 h-3 w-3" />
+                Save
+              </Button>
+            </div>
           ) : (
-            <Button
-              variant="link"
-              size="sm"
-              className="h-auto p-0 text-[11px]"
-              onClick={() => openOptions("models")}
-            >
-              Download a model →
-            </Button>
+            <div className="flex items-center justify-between">
+              <code className="text-muted-foreground rounded bg-muted/50 px-2 py-1 text-[10px]">
+                {backendUrl}
+              </code>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground h-auto px-2 py-1 text-[10px]"
+                onClick={() => {
+                  setTempUrl(backendUrl);
+                  setEditing(true);
+                }}
+              >
+                Edit
+              </Button>
+            </div>
           )}
         </div>
 
-        <Separator />
-
-        {/* Simplify Text */}
-        <div className="flex items-center justify-between px-4 py-3">
-          <div>
-            <Label className="text-[13px] font-medium">
-              Simplify Text <Pencil size={12} />
-            </Label>
-            <p className="text-muted-foreground mt-0.5 text-[10px]">
-              {rewriteEnabled
-                ? "Showing buttons on paragraphs"
-                : "Adds a button below each paragraph"}
-            </p>
-          </div>
-          <Switch checked={rewriteEnabled} onCheckedChange={toggleRewrite} />
-        </div>
-
-        <Separator />
-
-        {/* Dictionary Mode */}
-        <div className="flex items-center justify-between px-4 py-3">
-          <div>
-            <Label className="text-[13px] font-medium">
-              Dictionary Mode <BookA size={13} />
-            </Label>
-            <p className="text-muted-foreground mt-0.5 text-[10px]">
-              {dictEnabled
-                ? "Double-click a word for simple definitions"
-                : "Popup definition on double-click"}
-            </p>
-          </div>
-          <Switch checked={dictEnabled} onCheckedChange={toggleDict} />
-        </div>
-
-        <Separator />
-
-        {/* Reading Ruler */}
-        <div className="flex items-center justify-between px-4 py-3">
-          <div>
-            <Label className="text-[13px] font-medium">
-              Reading Ruler <Highlighter size={13} />
-            </Label>
-            <p className="text-muted-foreground mt-0.5 text-[10px]">
-              {rulerEnabled
-                ? "Ruler active — Alt+R to toggle"
-                : "Focus aid for reading"}
-            </p>
-          </div>
-          <Switch
-            checked={rulerEnabled}
-            onCheckedChange={async (next) => {
-              setRulerEnabled(next);
-              const [tab] = await chrome.tabs.query({
-                active: true,
-                currentWindow: true,
-              });
-              if (tab?.id) {
-                chrome.tabs
-                  .sendMessage(tab.id, {
-                    action: "SET_RULER_ENABLED",
-                    value: next,
-                  })
-                  .catch(() => {});
-              }
-            }}
-          />
-        </div>
-
-        <Separator />
-
-        {/* Read Mode */}
-        <div className="flex items-center justify-between px-4 py-3">
-          <div>
-            <Label className="text-[13px] font-medium">
-              Read Mode <BookOpenText size={13} />
-            </Label>
-            <p className="text-muted-foreground mt-0.5 text-[10px]">
-              {readModeEnabled
-                ? "Hiding clutter — Esc to exit"
-                : "Show only article content"}
-            </p>
-          </div>
-          <Switch
-            checked={readModeEnabled}
-            onCheckedChange={async (next) => {
-              setReadModeEnabled(next);
-              const [tab] = await chrome.tabs.query({
-                active: true,
-                currentWindow: true,
-              });
-              if (tab?.id) {
-                chrome.tabs
-                  .sendMessage(tab.id, {
-                    action: "SET_READ_MODE_ENABLED",
-                    value: next,
-                  })
-                  .catch(() => {});
-              }
-            }}
-          />
-        </div>
-
-        <Separator />
-
-        {/* Dyslexia Fonts */}
-        <div className="px-4 py-3">
-          <div className="mb-2 flex items-center gap-1.5">
-            <Label className="text-[13px] font-medium">Dyslexia Fonts</Label>
-            <Type size={13} />
-          </div>
-          <p className="text-muted-foreground mb-2 text-[10px]">
-            Override website fonts
-          </p>
-          <div className="grid grid-cols-4 gap-1.5">
-            {FONTS.map((f) => (
-              <Button
-                key={f.id}
-                variant={activeFont === f.id ? "secondary" : "outline"}
-                size="sm"
-                onClick={() => setFont(f.id)}
-                title={f.label}
-                className="h-auto flex-col items-center gap-1 px-1 py-1.5"
-              >
-                <span
-                  className="text-[11px] leading-none"
-                  style={f.id !== "default" ? { fontFamily: f.id } : {}}
-                >
-                  Aa
-                </span>
-                <span className="text-muted-foreground text-[9px] leading-none">
-                  {f.label}
-                </span>
-              </Button>
-            ))}
-          </div>
-        </div>
-        <Separator />
-
-        {/* Color Profiles */}
-        <div className="px-4 py-3">
-          <p className="text-muted-foreground mb-2 text-[11px] font-medium tracking-wide uppercase">
-            Color Profile
-          </p>
-          <div className="grid grid-cols-3 gap-1.5">
-            {PROFILES.map((p) => (
-              <Button
-                key={p.id}
-                variant={activeProfile === p.id ? "secondary" : "outline"}
-                size="sm"
-                onClick={() => setProfile(p.id)}
-                title={p.label}
-                className="flex h-auto flex-col items-center gap-1 px-1 py-1.5"
-              >
-                <span className="text-base">{p.emoji}</span>
-                <span className="text-muted-foreground text-[9px] leading-none">
-                  {p.label}
-                </span>
-              </Button>
-            ))}
-          </div>
-          <Button
-            variant="link"
-            size="sm"
-            className="text-muted-foreground mt-1 h-auto w-full py-1 text-[11px]"
-            onClick={() => openOptions("colors")}
-          >
-            Customize profiles →
-          </Button>
-        </div>
-
-        <Separator />
-
         {/* Footer */}
-        <div className="flex gap-2 px-4 py-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 text-[11px]"
-            onClick={() => openOptions("models")}
-          >
-            Models <Brain />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 text-[11px]"
-            onClick={() => openOptions("chat")}
-            disabled={!activeModel}
-          >
-            Chat <BotMessageSquare />
-          </Button>
-        </div>
-        {!activeModel && (
-          <p className="w-full text-center text-[10px] leading-relaxed text-orange-600 dark:text-orange-500">
-            Please download a model to use chat.
+        <div className="mt-auto px-4 py-2.5">
+          <p className="text-muted-foreground text-center text-[9px]">
+            TrueLens v1.0.0 — Content Authenticity Verification
           </p>
-        )}
+        </div>
       </div>
     </div>
   );
