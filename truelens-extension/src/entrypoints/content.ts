@@ -965,38 +965,40 @@ export default defineContentScript({
         contentArea.appendChild(unavailable);
       }
 
-      // ─── Divider ───
-      const dividerWrap = el("div", {
-        position: "relative",
-        padding: "8px 0",
-        marginBottom: "12px",
-      });
-      const dividerLine = el("div", {
-        height: "1px",
-        background: DARK_BORDER,
-      });
-      const dividerLabel = el("span", {
-        position: "absolute",
-        left: "50%",
-        top: "50%",
-        transform: "translate(-50%, -50%)",
-        background: DARK_BG,
-        padding: "0 10px",
-        fontSize: "9px",
-        fontWeight: "600",
-        textTransform: "uppercase",
-        letterSpacing: "0.06em",
-        color: TEXT_MUTED,
-        whiteSpace: "nowrap",
-        fontFamily: '"Inter", system-ui, -apple-system, sans-serif',
-      });
-      dividerLabel.textContent = "Related claims from fact-check databases";
-      dividerWrap.appendChild(dividerLine);
-      dividerWrap.appendChild(dividerLabel);
-      contentArea.appendChild(dividerWrap);
-
-      // ─── Related Claims Section ───
+      // ─── Related Claims Section (Only visible if claims are found) ───
       if (db && db.claims_found > 0 && db.top_reviews) {
+        // ─── Divider ───
+        const dividerWrap = el("div", {
+          position: "relative",
+          margin: "16px 0",
+        });
+        const dividerLine = el("div", {
+          position: "absolute",
+          inset: "0",
+          display: "flex",
+          alignItems: "center",
+        });
+        dividerLine.innerHTML = `<div style="width: 100%; border-top: 1px solid ${DARK_BORDER}"></div>`;
+        const dividerLabel = el("span", {
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          background: DARK_BG,
+          padding: "0 10px",
+          fontSize: "9px",
+          fontWeight: "600",
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: TEXT_MUTED,
+          whiteSpace: "nowrap",
+          fontFamily: '"Inter", system-ui, -apple-system, sans-serif',
+        });
+        dividerLabel.textContent = "Related claims from fact-check databases";
+        dividerWrap.appendChild(dividerLine);
+        dividerWrap.appendChild(dividerLabel);
+        contentArea.appendChild(dividerWrap);
+
         for (const review of db.top_reviews) {
           const badge = getRatingBadge(review.rating || "Unknown");
           const reviewCard = el("div", {
@@ -1123,49 +1125,6 @@ export default defineContentScript({
           reviewCard.appendChild(bottomRow);
           contentArea.appendChild(reviewCard);
         }
-      } else {
-        // No claims found
-        const noResults = el("div", {
-          textAlign: "center",
-          padding: "20px 12px",
-          background: DARK_SURFACE,
-          border: `1px solid ${DARK_BORDER}`,
-          borderRadius: "8px",
-        });
-        const noIcon = el("div", {
-          color: TEXT_MUTED,
-          opacity: "0.5",
-          marginBottom: "8px",
-          fontFamily: '"Inter", system-ui, -apple-system, sans-serif',
-        });
-        noIcon.innerHTML = ICONS.helpCircle.replace(
-          'width="16"',
-          'width="28"',
-        ).replace('height="16"', 'height="28"');
-        noResults.appendChild(noIcon);
-
-        const noTitle = el("p", {
-          fontSize: "13px",
-          fontWeight: "600",
-          color: TEXT_PRIMARY,
-          margin: "0 0 4px 0",
-          fontFamily: '"Inter", system-ui, -apple-system, sans-serif',
-        });
-        noTitle.textContent = "No Related Claims Found";
-        noResults.appendChild(noTitle);
-
-        const noDesc = el("p", {
-          fontSize: "11px",
-          color: TEXT_MUTED,
-          margin: "0",
-          lineHeight: "1.5",
-          fontFamily: '"Inter", system-ui, -apple-system, sans-serif',
-        });
-        noDesc.textContent =
-          "No historical claims matching your query were found in fact-check databases. The AI Verdict above is your best source of truth.";
-        noResults.appendChild(noDesc);
-
-        contentArea.appendChild(noResults);
       }
     }
 
