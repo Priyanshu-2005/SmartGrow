@@ -250,98 +250,92 @@ export default function FactCheckPage() {
                 )}
               </section>
 
-              {/* Divider */}
-              <div className="relative py-4">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="w-full border-t border-border-color"></div>
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="bg-background-dark px-4 text-xs font-medium text-text-muted uppercase tracking-wider">
-                    Related claims found in fact-check databases
-                  </span>
-                </div>
-              </div>
+              {/* Related Claims Section (Only visible if claims are found) */}
+              {dbResults && dbResults.claims_found > 0 && (
+                <>
+                  {/* Divider */}
+                  <div className="relative py-4">
+                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                      <div className="w-full border-t border-border-color"></div>
+                    </div>
+                    <div className="relative flex justify-center">
+                      <span className="bg-background-dark px-4 text-xs font-medium text-text-muted uppercase tracking-wider">
+                        Related claims found in fact-check databases
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Related Claims Section */}
-              <section>
-                {dbResults && dbResults.claims_found > 0 ? (
-                  <div className="space-y-4">
-                    {dbResults.top_reviews?.map((review, idx) => {
-                      const badge = getBadgeStyling(review.rating || "Unknown");
-                      const oldClaim = isOldClaim(review.claim_date);
-                      
-                      return (
-                        <div key={idx} className="bg-surface-dark border border-border-color rounded-lg p-5 hover:border-white/10 transition-colors">
-                          <div className="flex flex-col md:flex-row gap-5 items-start">
-                            
-                            <div className="flex-1 min-w-0">
-                              {/* Contextual Note */}
-                              <div className="inline-flex items-center gap-1.5 bg-background-dark px-2 py-1 rounded text-[10px] uppercase font-semibold text-text-muted mb-3 border border-border-color">
-                                <AlertCircle className="w-3 h-3" />
-                                Related claim — not a direct verdict on your query
-                              </div>
-
-                              <p className="text-text-primary font-medium italic border-l-2 border-border-color pl-3 py-0.5 mb-3">
-                                "{review.text || "Unknown claim text"}"
-                              </p>
+                  <section>
+                    <div className="space-y-4">
+                      {dbResults.top_reviews?.map((review, idx) => {
+                        const badge = getBadgeStyling(review.rating || "Unknown");
+                        const oldClaim = isOldClaim(review.claim_date);
+                        
+                        return (
+                          <div key={idx} className="bg-surface-dark border border-border-color rounded-lg p-5 hover:border-white/10 transition-colors">
+                            <div className="flex flex-col md:flex-row gap-5 items-start">
                               
-                              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-muted">
-                                <span>
-                                  Claimed by <strong className="text-text-secondary">{review.claimant || "Unknown"}</strong>
-                                </span>
-                                {review.claim_date && (
-                                  <span>• {new Date(review.claim_date).toLocaleDateString()}</span>
-                                )}
-                                <span className="flex items-center gap-1">
-                                  • <Globe className="w-3.5 h-3.5" /> Fact-checked by <strong className="text-text-secondary">{review.publisher}</strong>
-                                </span>
-                              </div>
-
-                              {oldClaim && (
-                                <div className="mt-3 text-xs text-warning flex items-center gap-1.5 bg-warning/10 inline-flex px-2 py-1 rounded-md border border-warning/20">
-                                  <AlertCircle className="w-3.5 h-3.5" />
-                                  This claim predates the event — may be a resurface of older content.
+                              <div className="flex-1 min-w-0">
+                                {/* Contextual Note */}
+                                <div className="inline-flex items-center gap-1.5 bg-background-dark px-2 py-1 rounded text-[10px] uppercase font-semibold text-text-muted mb-3 border border-border-color">
+                                  <AlertCircle className="w-3 h-3" />
+                                  Related claim — not a direct verdict on your query
                                 </div>
-                              )}
-                            </div>
 
-                            {/* Badge and Link */}
-                            <div className="shrink-0 flex flex-col items-start md:items-end w-full md:w-40 pt-3 md:pt-0 border-t md:border-t-0 md:border-l border-border-color md:pl-5">
-                              <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md border font-bold uppercase text-[11px] mb-3 ${badge.bg} ${badge.text} ${badge.border}`}>
-                                {badge.icon}
-                                {review.rating}
+                                <p className="text-text-primary font-medium italic border-l-2 border-border-color pl-3 py-0.5 mb-3">
+                                  "{review.text || "Unknown claim text"}"
+                                </p>
+                                
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-muted">
+                                  <span>
+                                    Claimed by <strong className="text-text-secondary">{review.claimant || "Unknown"}</strong>
+                                  </span>
+                                  {review.claim_date && (
+                                    <span>• {new Date(review.claim_date).toLocaleDateString()}</span>
+                                  )}
+                                  <span className="flex items-center gap-1">
+                                    • <Globe className="w-3.5 h-3.5" /> Fact-checked by <strong className="text-text-secondary">{review.publisher}</strong>
+                                  </span>
+                                </div>
+
+                                {oldClaim && (
+                                  <div className="mt-3 text-xs text-warning flex items-center gap-1.5 bg-warning/10 inline-flex px-2 py-1 rounded-md border border-warning/20">
+                                    <AlertCircle className="w-3.5 h-3.5" />
+                                    This claim predates the event — may be a resurface of older content.
+                                  </div>
+                                )}
                               </div>
-                              {review.url && (
-                                <a
-                                  href={review.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-[11px] font-medium text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1"
-                                >
-                                  Source Link <ExternalLink className="w-3 h-3" />
-                                </a>
-                              )}
-                            </div>
 
+                              {/* Badge and Link */}
+                              <div className="shrink-0 flex flex-col items-start md:items-end w-full md:w-40 pt-3 md:pt-0 border-t md:border-t-0 md:border-l border-border-color md:pl-5">
+                                <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md border font-bold uppercase text-[11px] mb-3 ${badge.bg} ${badge.text} ${badge.border}`}>
+                                  {badge.icon}
+                                  {review.rating}
+                                </div>
+                                {review.url && (
+                                  <a
+                                    href={review.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[11px] font-medium text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1"
+                                  >
+                                    Source Link <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                )}
+                              </div>
+
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                    
-                    <p className="text-center text-xs text-text-muted mt-6 max-w-xl mx-auto">
-                      These claims are sourced from third-party fact-check databases (e.g. Google Fact Check Tools) and reflect verdicts by their respective independent journalistic organizations.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="bg-surface-dark border border-border-color rounded-xl p-8 text-center shadow-sm">
-                    <ShieldQuestion className="w-10 h-10 text-text-muted mx-auto mb-3 opacity-50" />
-                    <h3 className="text-base font-semibold text-text-secondary mb-1">No Related Claims Found</h3>
-                    <p className="text-text-muted text-sm max-w-md mx-auto">
-                      We couldn't find any historical claims in our independent databases that match your query. The AI Verdict above is your best source of truth.
-                    </p>
-                  </div>
-                )}
-              </section>
+                        );
+                      })}
+                      
+                      <p className="text-center text-xs text-text-muted mt-6 max-w-xl mx-auto">
+                        These claims are sourced from third-party fact-check databases (e.g. Google Fact Check Tools) and reflect verdicts by their respective independent journalistic organizations.
+                      </p>
+                    </div>
+                  </section>
+                </>
+              )}
 
             </motion.div>
           )}
