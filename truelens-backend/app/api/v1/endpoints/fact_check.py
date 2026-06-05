@@ -35,9 +35,13 @@ def perform_live_ai_fact_check(query: str = Query(..., min_length=3, description
     try:
         result = evaluate_claim_live(query)
         if not result.get("available", False):
-            if "GEMINI_API_KEY" in result.get("error", ""):
+            error_msg = result.get("error", "AI evaluation failed")
+            logger.error(f"Live AI Fact check error for query '{query}': {error_msg}")
+            if "GEMINI_API_KEY" in error_msg:
                 raise HTTPException(status_code=503, detail="Live AI Fact Check is not configured (GEMINI_API_KEY missing)")
-            raise HTTPException(status_code=500, detail=result.get("error", "AI evaluation failed"))
+            if "quota" in error_msg.lower() or "exceeded" in error_msg.lower():
+                raise HTTPException(status_code=429, detail=error_msg)
+            raise HTTPException(status_code=500, detail=error_msg)
             
         return result
     except HTTPException:

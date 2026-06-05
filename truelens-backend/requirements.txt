@@ -28,7 +28,7 @@ qrcode[pil]==8.2
 
 # ── AI / Gemini ──
 google-generativeai>=0.4.0
-wikipedia>=1.4.0
+google-genai>=1.0.0
 
 # ── ML / AI Text Detection (Transformer + Stylometry Ensemble) ──
 torch>=2.1.0
