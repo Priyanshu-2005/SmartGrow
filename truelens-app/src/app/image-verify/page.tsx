@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, ImageIcon, Loader2, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import TrustScoreGauge from "@/components/TrustScoreGauge";
 import SignalCard from "@/components/SignalCard";
 
-export default function ImageVerifyPage() {
+function ImageVerifyContent() {
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [result, setResult] = useState<any | null>(null);
@@ -228,5 +228,20 @@ export default function ImageVerifyPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function ImageVerifyPage() {
+  return (
+    <Suspense fallback={
+      <div className="py-10 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="w-12 h-12 mx-auto mb-4 animate-spin rounded-full border-2 border-white/10 border-t-white/60" />
+          <p className="text-text-muted text-sm">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ImageVerifyContent />
+    </Suspense>
   );
 }
