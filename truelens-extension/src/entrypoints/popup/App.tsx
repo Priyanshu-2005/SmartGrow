@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import TLLogo from "@/assets/icon.png";
-import { Shield, CircleDot, Settings, Save } from "lucide-react";
+import { Shield, CircleDot, Settings, Save, Globe } from "lucide-react";
 
 export default function App() {
   const [backendUrl, setBackendUrl] = useState("http://127.0.0.1:8000");
@@ -15,12 +15,18 @@ export default function App() {
   const [editing, setEditing] = useState(false);
   const [tempUrl, setTempUrl] = useState("");
 
+  const [websiteUrl, setWebsiteUrl] = useState("http://localhost:3000");
+  const [editingWebsite, setEditingWebsite] = useState(false);
+  const [tempWebsiteUrl, setTempWebsiteUrl] = useState("");
+
   useEffect(() => {
     chrome.storage.local.get(
-      { backendUrl: "http://127.0.0.1:8000" },
+      { backendUrl: "http://127.0.0.1:8000", websiteUrl: "http://localhost:3000" },
       (res) => {
         setBackendUrl(res.backendUrl as string);
         setTempUrl(res.backendUrl as string);
+        setWebsiteUrl(res.websiteUrl as string);
+        setTempWebsiteUrl(res.websiteUrl as string);
         checkConnection(res.backendUrl as string);
       },
     );
@@ -44,6 +50,13 @@ export default function App() {
     await chrome.storage.local.set({ backendUrl: cleanUrl });
     setEditing(false);
     checkConnection(cleanUrl);
+  };
+
+  const saveWebsiteUrl = async () => {
+    const cleanUrl = tempWebsiteUrl.replace(/\/+$/, "");
+    setWebsiteUrl(cleanUrl);
+    await chrome.storage.local.set({ websiteUrl: cleanUrl });
+    setEditingWebsite(false);
   };
 
   const statusColor = {
@@ -166,6 +179,56 @@ export default function App() {
                 onClick={() => {
                   setTempUrl(backendUrl);
                   setEditing(true);
+                }}
+              >
+                Edit
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <Separator />
+
+        {/* Website URL Setting */}
+        <div className="px-4 py-3.5">
+          <div className="mb-2 flex items-center gap-1.5">
+            <Globe className="text-muted-foreground h-3.5 w-3.5" />
+            <Label className="text-[11px] font-medium tracking-wide uppercase">
+              Website URL
+            </Label>
+          </div>
+
+          {editingWebsite ? (
+            <div className="flex gap-1.5">
+              <Input
+                value={tempWebsiteUrl}
+                onChange={(e) => setTempWebsiteUrl(e.target.value)}
+                className="h-8 text-[11px]"
+                placeholder="http://localhost:3000"
+                onKeyDown={(e) => e.key === "Enter" && saveWebsiteUrl()}
+              />
+              <Button
+                size="sm"
+                variant="secondary"
+                className="h-8 px-2.5 text-[10px]"
+                onClick={saveWebsiteUrl}
+              >
+                <Save className="mr-1 h-3 w-3" />
+                Save
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <code className="text-muted-foreground rounded bg-muted/50 px-2 py-1 text-[10px]">
+                {websiteUrl}
+              </code>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground h-auto px-2 py-1 text-[10px]"
+                onClick={() => {
+                  setTempWebsiteUrl(websiteUrl);
+                  setEditingWebsite(true);
                 }}
               >
                 Edit

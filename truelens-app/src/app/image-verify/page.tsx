@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, ImageIcon, Loader2, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import TrustScoreGauge from "@/components/TrustScoreGauge";
@@ -10,12 +11,16 @@ export default function ImageVerifyPage() {
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [result, setResult] = useState<any | null>(null);
+  const [extPending, setExtPending] = useState(false);
+  const searchParams = useSearchParams();
+  const hasProcessedRef = useRef(false);
 
   const handleUpload = async (files: FileList | File[]) => {
     const file = files[0];
     if (!file) return;
 
     setLoading(true);
+    setExtPending(false);
     setResult(null);
     try {
       const formData = new FormData();
@@ -39,6 +44,45 @@ export default function ImageVerifyPage() {
       setLoading(false);
     }
   };
+
+  // Listen for image data from TrueLens extension
+  useEffect(() => {
+    const isFromExtension = searchParams.get("ext") === "1";
+    if (!isFromExtension) return;
+
+    setExtPending(true);
+
+    const handleMessage = (event: MessageEvent) => {
+      if (
+        event.data?.type === "TRUELENS_IMAGE" &&
+        event.data?.imageData &&
+        !hasProcessedRef.current
+      ) {
+        hasProcessedRef.current = true;
+
+        // Convert base64 data URL to File
+        const dataUrl: string = event.data.imageData;
+        const [header, base64] = dataUrl.split(",");
+        const mimeMatch = header.match(/:(.*?);/);
+        const mime = mimeMatch ? mimeMatch[1] : "image/png";
+        const ext = mime.split("/")[1] || "png";
+
+        const byteString = atob(base64);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        const blob = new Blob([ab], { type: mime });
+        const file = new File([blob], `image.${ext}`, { type: mime });
+
+        handleUpload([file]);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [searchParams]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -105,6 +149,12 @@ export default function ImageVerifyPage() {
               <Loader2 className="w-12 h-12 text-text-primary mx-auto mb-4 animate-spin" />
               <p className="text-text-primary font-medium text-lg">Analyzing image...</p>
               <p className="text-text-muted text-sm mt-2">Running deep learning models and forensic analysis</p>
+            </div>
+          ) : extPending ? (
+            <div className="py-10">
+              <Loader2 className="w-12 h-12 text-text-primary mx-auto mb-4 animate-spin" />
+              <p className="text-text-primary font-medium text-lg">Receiving image from extension...</p>
+              <p className="text-text-muted text-sm mt-2">The image will be verified automatically</p>
             </div>
           ) : (
             <div className="py-10">

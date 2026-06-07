@@ -1160,6 +1160,20 @@ export default defineContentScript({
       }, 10);
     });
 
+    // ─── Listen for image injection from background script ───
+    chrome.runtime.onMessage.addListener((message) => {
+      if (message.action === "INJECT_IMAGE" && message.payload?.imageData) {
+        // Forward image data to the webpage via postMessage
+        window.postMessage(
+          {
+            type: "TRUELENS_IMAGE",
+            imageData: message.payload.imageData,
+          },
+          "*",
+        );
+      }
+    });
+
     // Dismiss toolbar on click elsewhere (but not on the toolbar itself)
     document.addEventListener("mousedown", (e) => {
       if (floatingToolbar && !floatingToolbar.contains(e.target as Node)) {

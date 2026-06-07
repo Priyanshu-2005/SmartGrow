@@ -2,10 +2,12 @@
 
 export interface StorageSchema {
   backendUrl: string;
+  websiteUrl: string;
 }
 
 export const STORAGE_DEFAULTS: StorageSchema = {
   backendUrl: "http://127.0.0.1:8000",
+  websiteUrl: "http://localhost:3000",
 };
 
 export async function getStorage<K extends keyof StorageSchema>(

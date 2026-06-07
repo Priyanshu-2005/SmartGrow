@@ -16,7 +16,7 @@ export default defineConfig({
     description:
       "AI-powered browser extension to verify content authenticity. Analyze selected text for AI-generated content and fact-check claims instantly.",
     version: "1.0.0",
-    permissions: ["activeTab", "storage"],
+    permissions: ["activeTab", "storage", "contextMenus"],
     host_permissions: ["*://*/*"],
     content_security_policy: {
       extension_pages:
